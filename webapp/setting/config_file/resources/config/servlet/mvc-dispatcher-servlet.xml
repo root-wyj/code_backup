@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd">
+
+	<!-- 扫描controller的包 -->
+	<context:component-scan base-package="com.shixi.web.controller">
+		<!-- 只需要管理我们的controller，并不需要管理我们的service -->
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+		<context:include-filter type="annotation"
+			expression="org.springframework.web.bind.annotation.RestController" />
+	</context:component-scan>
+
+	<!-- 启用Spring基于annotation的DI -->
+	<context:annotation-config />
+	<!-- 关于该标签的理解可以看 ：https://my.oschina.net/HeliosFly/blog/205343 -->
+	<mvc:annotation-driven>
+
+		<!-- 避免ajax post 请求，返回 415 Unsupported Media Type 的错误 -->
+		<!--- StringHttpMessageConverter bean 这个类莫名其妙 设置的默认编码方式为 iso-8859-1 -->
+		<!-- 百度了一万次了 终于找到了正确的注入方式 关于怎么根于源码注入：参考 http://www.tuicool.com/articles/QJrmua -->
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/plain;charset=UTF-8</value>
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+				<!-- 解决response 的 Accept-Charset 产生大量的数据 -->
+				<property name="writeAcceptCharset" value="false" />
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	<!-- 关于拦截下来 的静态资源处理 -->
+	<!-- <mvc:resources location="/images/" mapping="/images/**"/> -->
+	<mvc:default-servlet-handler />
+
+	<!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
+	<bean id="mappingJacksonHttpMessageConverter"
+		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>application/json;charset=UTF-8</value>
+				<value>text/html;charset=UTF-8</value>
+				<value>application/x-www-form-urlencoded</value>
+			</list>
+		</property>
+	</bean>
+	<!-- 启动Spring MVC的注解功能，完成请求和注解POJO的映射 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="mappingJacksonHttpMessageConverter" /><!-- json转换器 -->
+			</list>
+		</property>
+	</bean>
+
+	<!-- 处理json转化异常的适配器，对于调试查找问题非常有用 -->
+	<bean id="exceptionMessageAdapter"
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver">
+		<property name="messageConverters">
+			<list>
+				<!-- Support JSON -->
+				<bean
+					class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="customExceptionResolver" class="com.shixi.web.common.CustomExceptionResolver" />
+
+	<!-- 视图解析器 -->
+	<!-- 配置ViewResolver 可以使用多个ViewResolver 使用order属性排序 InternalResourceViewResolver放在最后 -->
+	<!-- 配置jackson，使返回的为json -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/"></property>
+		<!-- <property name="prefix" value="/fore/"></property> -->
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+
+	<context:component-scan base-package="com.shixi.web.aop.ctro"/>
+	<aop:aspectj-autoproxy expose-proxy="true"></aop:aspectj-autoproxy> 
+
+	<!-- <bean id="resultPrinterAop" class="com.shixi.web.aop.ctro.ReturnLoggerAop" /> -->
+
+	<!-- 打印Controller返回值的AOP -->
+		<!-- <aop:config>
+			<aop:aspect ref="resultPrinterAop">
+				<aop:pointcut expression="execution(public java.lang.String com.shixi.web.controller.*.*(..))"
+					id="cutPoint" />
+				<aop:after-returning method="hehe" pointcut="execution(public java.lang.String com.shixi.web.controller.*.*(..)) and args(joinPoint, value)" returning="value"/>
+				<aop:after-returning method="hehe" pointcut="execution(* com.shixi.web.controller.*.*(..)) and args(joinPoint, returnValue)" />
+				<aop:after-throwing method="afterThrowException" pointcut-ref="cutPoint" throwing="error"/>
+			</aop:aspect>
+		</aop:config> -->
+
+	<!-- 加入拦截器 -->
+	<mvc:interceptors>
+		<bean class="com.shixi.web.interceptor.CrossOriginResponseInterceptor"></bean>
+	
+		<!-- 解析cookie -->
+		<bean class="com.shixi.web.interceptor.AnalyzeInterceptor"/>
+	
+		<!-- <bean class="hou tai fenxi" /> -->
+	
+		<!-- 登录拦截 -->
+		<mvc:interceptor>
+			<!-- <mvc:mapping path="/users/user/userinfo"/> -->
+			
+			<!-- 身份认证 -->
+ 			<mvc:mapping path="/identity/uidcard"/>
+			<mvc:mapping path="/identity/upassport"/>
+			<mvc:mapping path="/identity/ucompany"/>
+			<mvc:mapping path="/identity/upic"/>
+			
+			<!-- 视频上传 -->
+  			<mvc:mapping path="/upload/ustart"/> 
+ 			<mvc:mapping path="/upload/ufile"/>
+ 			<mvc:mapping path="/upload/uinfo"/>
+ 			<mvc:mapping path="/upload/ucommit"/>
+ 			<mvc:mapping path="/upload/udelete"/>
+ 			<mvc:mapping path="/upload/ulist"/>
+ 			<mvc:mapping path="/upload/vinfo"/>
+ 			<mvc:mapping path="/upload/vlist"/>
+ 			<mvc:mapping path="/upload/usort"/>
+ 			<mvc:mapping path="/upload/ustatus"/>
+ 			<mvc:mapping path="/upload/urefresh"/>
+ 			<mvc:mapping path="/upload/uheartbeat"/>
+			<!-- <mvc:exclude-mapping path="/upload/getinfo"/> -->
+			
+			<!-- 视频数据 -->
+ 			<mvc:mapping path="/video/uservinfo"/>
+ 			<mvc:mapping path="/video/uservlist"/>
+ 			<mvc:mapping path="/video/editinfo"/>
+ 			<mvc:mapping path="/video/delvideo"/>
+ 			<mvc:mapping path="/video/delStudyVideo"/>
+ 			<mvc:mapping path="/video/delreason"/>
+ 			<mvc:mapping path="/video/videoprice"/>
+ 			<mvc:mapping path="/video/searchAdvice"/>
+ 			
+ 			<!-- 用户充值 -->
+ 			<mvc:mapping path="/recharge/newTrade"/>
+ 			<mvc:mapping path="/recharge/payTrade"/>
+ 			<mvc:mapping path="/recharge/codePay"/>
+			<mvc:mapping path="/recharge/querytrade"/>
+			<mvc:mapping path="/recharge/records"/>
+			<mvc:mapping path="/recharge/queryTradeStatus"/>
+			<mvc:mapping path="/recharge/confirmTrade"/>
+
+			<!-- 用户中心 -->
+ 			<mvc:mapping path="/member/assets"/>
+ 			<mvc:mapping path="/user/*/bind" />
+ 			<mvc:mapping path="/user/*/unbind"/>
+ 			<mvc:mapping path="/user/accountsecurity"/>
+ 			<mvc:mapping path="/user/email/modify" />
+ 			<mvc:mapping path="/user/phone/modify"/>
+			
+			<!-- 交易购买 -->
+ 			<mvc:mapping path="/trade/records"/>
+ 			<mvc:mapping path="/trade/income"/>
+ 			<mvc:mapping path="/trade/detail"/>
+			<mvc:mapping path="/trade/videoorder"/>
+			<mvc:mapping path="/trade/payorder"/>
+			<mvc:mapping path="/trade/purchasers"/>
+			<mvc:mapping path="/trade/rewarddetail"/>
+			<mvc:mapping path="/trade/payreward"/>
+			
+			<!-- 优惠券 -->
+			<mvc:mapping path="/coupon/**/*"/>
+						
+			<bean class="com.shixi.web.interceptor.AuthorizeInterceptor"></bean>
+		</mvc:interceptor>
+		
+		<!-- 实名认证拦截 -->
+		<mvc:interceptor>
+			<!-- 视频上传 -->
+  			<mvc:mapping path="/upload/ustart"/> 
+ 			<mvc:mapping path="/upload/ufile"/>
+ 			<mvc:mapping path="/upload/uinfo"/>
+ 			<mvc:mapping path="/upload/ucommit"/>
+ 			<mvc:mapping path="/upload/udelete"/>
+ 			<mvc:mapping path="/upload/ulist"/>
+ 			<mvc:mapping path="/upload/vinfo"/>
+ 			<mvc:mapping path="/upload/vlist"/>
+ 			<mvc:mapping path="/upload/usort"/>
+ 			<mvc:mapping path="/upload/ustatus"/>
+ 			<mvc:mapping path="/upload/urefresh"/>
+ 			<mvc:mapping path="/upload/uheartbeat"/>
+			
+			<bean class="com.shixi.web.interceptor.IdentityAuthInterceptor"></bean>
+		</mvc:interceptor>
+		
+		<!-- 后台拦截器 -->
+		<mvc:interceptor>
+			<!-- 后台拦截器 -->
+			<mvc:mapping path="/upload/review/query"/>
+			<mvc:mapping path="/upload/review/commit"/>
+			<mvc:mapping path="/upload/review/clip"/>
+			<mvc:mapping path="/upload/review/ufile"/>
+			<mvc:mapping path="/upload/review/ustatus"/>
+			<mvc:mapping path="/upload/review/editinfo" />
+			<mvc:mapping path="/upload/review/message"/>
+			<mvc:mapping path="/identity/review/query"/>
+			<mvc:mapping path="/identity/review/commit"/>
+			<mvc:mapping path="/identity/review/message"/>
+			<mvc:mapping path="/manager/addUser"/>
+			<mvc:mapping path="/manager/modifyPassword"/>
+			<mvc:mapping path="/manager/getBackUserList"/>
+			<mvc:mapping path="/manager/modifyAuthority"/>
+			<bean class="com.shixi.web.backmanage.interceptor.BackLoginInterceptor" />
+		</mvc:interceptor>
+		
+		
+		<mvc:interceptor>
+			<!-- 浏览数据 读拦截器 -->
+			<mvc:mapping path="/upload/review/query"/>
+			<mvc:mapping path="/upload/review/message"/>
+			<mvc:mapping path="/identity/review/query"/>
+			<mvc:mapping path="/identity/review/message"/>
+			<bean class="com.shixi.web.backmanage.interceptor.BackReaderInterceptor" />
+		</mvc:interceptor>
+		
+		<mvc:interceptor>
+			<!-- 身份审核 -->
+			<mvc:mapping path="/identity/review/query"/>
+			<mvc:mapping path="/identity/review/commit"/>
+			<mvc:mapping path="/identity/review/message"/>
+			<bean class="com.shixi.web.backmanage.interceptor.BackIdentityAuditInterceptor" />
+		</mvc:interceptor>
+		
+		<mvc:interceptor>
+			<!-- 视频审核 -->
+			<mvc:mapping path="/upload/review/query"/>
+			<mvc:mapping path="/upload/review/commit"/>
+			<mvc:mapping path="/upload/review/clip"/>
+			<mvc:mapping path="/upload/review/ufile"/>
+			<mvc:mapping path="/upload/review/ustatus"/>
+			<mvc:mapping path="/upload/review/editinfo" />
+			<bean class="com.shixi.web.backmanage.interceptor.BackVideoAuditInterceptor" />
+		</mvc:interceptor>
+		
+		<mvc:interceptor>
+			<!-- admin管理员  必须放在权限鉴定流程的最后一个 -->
+			<mvc:mapping path="/upload/review/query"/>
+			<mvc:mapping path="/upload/review/commit"/>
+			<mvc:mapping path="/upload/review/clip"/>
+			<mvc:mapping path="/upload/review/ufile"/>
+			<mvc:mapping path="/upload/review/ustatus"/>
+			<mvc:mapping path="/upload/review/editinfo" />
+			<mvc:mapping path="/upload/review/message"/>
+			<mvc:mapping path="/identity/review/query"/>
+			<mvc:mapping path="/identity/review/commit"/>
+			<mvc:mapping path="/identity/review/message"/>
+			<mvc:mapping path="/manager/addUser"/>
+			<mvc:mapping path="/manager/modifyPassword"/>
+			<mvc:mapping path="/manager/modifyAuthority"/>
+			<mvc:mapping path="/manager/getBackUserList"/>
+			<bean class="com.shixi.web.backmanage.interceptor.BackAdminInterceptor" />
+		</mvc:interceptor>
+
+	</mvc:interceptors>
+
+	<!-- 对上传的支持 需要commons-fileupload.jar和commons-io.jar的支持 设置(multipart渲染器) 
+		multipart就是file upload -->
+
+	<!-- class="org.springframework.web.multipart.commons.CommonsMultipartResolver"> -->
+	<bean id="multipartResolver" class="com.shixi.web.controller.CustomMultipartResolver">
+		<property name="maxUploadSize" value="4294967296" />
+		<property name="defaultEncoding" value="UTF-8" />
+
+		<!-- 设置在文件上传时允许写到内存中的最大值，以字节为单位计算，默认是10240 -->
+		<!-- 但是经实验，上传文件大小若小于此参数，则不会生成临时文件，故改为2048 -->
+		<property name="maxInMemorySize" value="2048" />
+
+		<!-- 上传文件的临时路径，文件上传完后，临时目录中的临时文件会被自动清除。 -->
+		<property name="uploadTempDir" value="fileUpload/temp" />
+	</bean>
+</beans>
+ 
+ 

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"
+	debug="true">
+	<!-- 可以配置多个appender来对应不同的输出，如文件输出，sql输出，控制台输出，邮件输出等 -->
+
+	<!-- [console日志APPENDER] -->
+	<appender name="CONSOLE-APPENDER" class="org.apache.log4j.ConsoleAppender"> <!-- name提供给logger或者root调用 -->
+		<param name="encoding" value="UTF-8" />
+		<param name="target" value="System.out" />
+		<param name="threshold" value="DEBUG" />
+		<!-- layout 表示输出方式，可以多种，class值区分，PatternLayout表示自定义格式 -->
+		<layout class="com.shixi.web.extension.log4j.AYouPatternLayout">
+			<!-- 日志格式 -->
+			<param name="ConversionPattern" value="%n%d{ISO8601} 耗时：%r backun:%B user:%U tid:%T from:%l %n>>> %-5p --- %m%n" />
+		</layout>
+	
+		<!-- filter过滤器设置输出的级别：All < DEBUG < INFO < WARN < ERROR < FATAL < OFF 所有下面输出的是debug到warn 
+			不会有error和fatal -->
+		<!-- <filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="levelMin" value="DEBUG" />
+			<param name="leveMax" value="WARN" />
+			<param name="AcceptOnMatch" value="true" />答案：http://bbs.csdn.net/topics/350195913
+		</filter> -->
+	</appender>
+
+	<!-- [file日志APPENDER] -->
+	<appender name="FILE-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="${catalina.home}/logs/ayou/ayou.log" /> <!-- ${web.root} 项目根路径，自动获得，不用配置，可自己在web.xml中配置 -->
+		<param name="Append" value="true" /> <!-- 是否项目重启继续保存之前的日志 -->
+		<param name="encoding" value="UTF-8" />
+		
+		<!-- 只输出定义的级别以上的LOG,因为在下面过滤LOG信息所以屏蔽 -->
+		<param name="threshold" value="DEBUG" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd'.log'" /><!-- 日期格式 
+			common-default.log.2015-06-06.log -->
+		<layout class="com.shixi.web.extension.log4j.AYouPatternLayout">
+			<param name="ConversionPattern" value="%n%d{ISO8601} 耗时：%r backun:%B user:%U tid:%T from:%l %n>>> %-5p --- %m%n" />
+		</layout>
+		
+		<!-- <filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="levelMin" value="INFO" />
+			<param name="leveMax" value="ERROR" /> -->
+			<!-- 答案：http://bbs.csdn.net/topics/350195913 -->
+			<!-- <param name="AcceptOnMatch" value="true" /> -->
+		<!-- </filter> -->
+	</appender>
+	
+	<!-- [充值日志APPENDER] -->
+	<appender name="RECHARGE-APPENDER" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="${catalina.home}/logs/ayou/recharge.log" />
+		<param name="Append" value="true" />
+		<param name="encoding" value="UTF-8" />
+		<param name="threshold" value="DEBUG" />
+		<param name="MaxFileSize" value="2097152" />
+		<param name="MaxBackupIndex" value="1000" />
+		<layout class="com.shixi.web.extension.log4j.AYouPatternLayout">
+			<param name="ConversionPattern" value="%n%d{ISO8601} 耗时：%r backun:%B user:%U tid:%T from:%l %n>>> %-5p --- %m%n" />
+		</layout>
+	</appender>
+	
+	<!-- [购买日志APPENDER] -->
+	<appender name="PURCHASE-APPENDER" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="${catalina.home}/logs/ayou/purchase.log" />
+		<param name="Append" value="true" />
+		<param name="encoding" value="UTF-8" />
+		<param name="threshold" value="DEBUG" />
+		<param name="MaxFileSize" value="2097152" />
+		<param name="MaxBackupIndex" value="1000" />
+		<layout class="com.shixi.web.extension.log4j.AYouPatternLayout">
+			<param name="ConversionPattern" value="%n%d{ISO8601} 耗时：%r backun:%B user:%U tid:%T from:%l %n>>> %-5p --- %m%n" />
+		</layout>
+	</appender>
+	
+	<!-- [打赏日志APPENDER] -->
+	<appender name="REWARD-APPENDER" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="${catalina.home}/logs/ayou/reward.log" />
+		<param name="Append" value="true" />
+		<param name="encoding" value="UTF-8" />
+		<param name="threshold" value="DEBUG" />
+		<param name="MaxFileSize" value="2097152" />
+		<param name="MaxBackupIndex" value="1000" />
+		<layout class="com.shixi.web.extension.log4j.AYouPatternLayout">
+			<param name="ConversionPattern" value="%n%d{ISO8601} 耗时：%r backun:%B user:%U tid:%T from:%l %n>>> %-5p --- %m%n" />
+		</layout>
+	</appender>
+	
+	<appender name="BACK-APPENDER" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="${catalina.home}/logs/ayou/back/back.log" />
+		<param name="Append" value="true" />
+		<param name="encoding" value="UTF-8" />
+		<param name="threshold" value="DEBUG" />
+		<param name="MaxFileSize" value="2097152" />
+		<param name="MaxBackupIndex" value="1000" />
+		<layout class="com.shixi.web.extension.log4j.AYouPatternLayout">
+			<param name="ConversionPattern" value="%n%d{ISO8601} 耗时：%r backun:%B user:%U tid:%T from:%l %n>>> %-5p --- %m%n" />
+		</layout>
+	</appender>
+
+   	<logger name="com.shixi.web" additivity="true">
+		<level value="${log.level}" />
+		<append-ref ref="${default.appender}" />
+	</logger>
+	
+	<logger name="com.shixi.web.mapper" additivity="true">
+		<level value="INFO" />
+		<append-ref ref="${default.appender}" />
+	</logger>
+	
+	<!-- sql日志 -->
+	
+	<logger name="org.apache.ibatis.logging" additivity="true">
+		<level value="DEBUG" />
+		<append-ref ref="${default.appender}" />
+	</logger>
+	
+	<logger name="RECHARGE-LOGGER" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="RECHARGE-APPENDER" />
+	</logger>
+	
+	<logger name="PURCHASE-LOGGER" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="PURCHASE-APPENDER" />
+	</logger>
+	
+	<logger name="REWARD-LOGGER" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="REWARD-APPENDER" />
+	</logger>
+	
+	<logger name="BACK-LOGGER" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="BACK-APPENDER" />
+	</logger>
+	
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="${default.appender}" />
+	</root>
+</log4j:configuration>

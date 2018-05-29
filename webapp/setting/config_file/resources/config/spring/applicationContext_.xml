@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:cache="http://www.springframework.org/schema/cache"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.0.xsd"  >
+        
+	<context:annotation-config/>
+    
+    <mvc:annotation-driven />
+    
+    <context:component-scan base-package="com.shixi.web">
+    	<!-- 对于Controller， 我们已经交给 mvc_dispatcher_servlet 来处理了，这里就不扫描他了 -->
+    	<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    	<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>
+    </context:component-scan>
+    
+    <!-- 激活组件扫描功能,在包com.shixi.web.aop及其子包下面自动扫描通过注解配置的组件 -->
+	<context:component-scan base-package="com.shixi.web.aop.aspect"/>
+   	<!-- 激活自动代理功能 -->
+	<aop:aspectj-autoproxy proxy-target-class="true"/>
+	<!-- <aop:aspectj-autoproxy proxy-target-class="true" expose-proxy="true"/> -->
+   
+    <!-- 在静态class中注入bean  需要手动配置xml文件  如下： -->
+    <bean class="com.shixi.web.authorize.cookie.UserCookieContainer">
+    	<property name="userCache" ref="userCache" />
+    </bean>
+    
+	<bean class="com.shixi.web.authorize.cache.UserCacheManager">
+		<property name="userService" ref="userService" />
+		<property name="userWebStateService" ref="userWebStateService"></property>
+	</bean>
+	
+	<bean class="com.shixi.web.authorize.cache.CacheListenerFactory">
+		<property name="userWebStateService" ref="userWebStateService"></property>
+	</bean>
+	
+	<bean class="com.shixi.web.htmrout.AuthUtils">
+		<property name="identityAuthService" ref="identityAuthService"></property>
+	</bean>
+	
+	<bean class="com.shixi.web.tools.SpringContextUtils"></bean>
+	<!-- <bean class="com.shixi.web.tools.BeanFactory"></bean> -->
+	
+	<!-- ehcache -->
+	<!-- <cache:annotation-driven cache-manager="cacheManager"/>
+	
+	<bean id="cacheManagerFactory" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:ehcache.xml" />
+	</bean>
+	
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+		<property name="cacheManager" ref="cacheManagerFactory" />
+	</bean> -->
+	
+</beans>

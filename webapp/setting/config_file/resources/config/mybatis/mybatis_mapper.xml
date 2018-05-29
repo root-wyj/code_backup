@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<!-- 1. 必须加上如下配置 （前缀并不能在日志中找到） 2. logger的日志级别必须是debug -->
+	<settings>
+		<setting  name="logImpl" value="SLF4J"/>
+		<setting name="logPrefix" value="mybatis_"/>
+	</settings>
+
+	<typeAliases>
+		<typeAlias type="com.shixi.web.model.User" alias="UserModel"/>
+		<typeAlias type="com.shixi.web.model.AUUser" alias="AUUserModel"/>
+		<typeAlias type="com.shixi.web.model.AUUserLoginState" alias="AUUserLoginState"/>
+		<typeAlias type="com.shixi.web.model.recharge.RechargeRecord" alias="RechargeRecord"/>
+	</typeAliases>
+	
+	<!-- <mappers>
+		告知映射文件方式1，一个一个设置
+		<mapper resource="classpath:com/shixi/web/mapper/UserMapper.xml"/>
+		告知映射文件方式2，自动扫描包内的Mapper接口与设置文件
+		<package name="com/shixi/web/mapper" />
+	</mappers> -->
+</configuration>

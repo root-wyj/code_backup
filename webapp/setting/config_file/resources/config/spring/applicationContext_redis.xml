@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:cache="http://www.springframework.org/schema/cache"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.0.xsd"  >
+	
+	<cache:annotation-driven cache-manager="cacheManager"/>
+
+	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+		<property name="caches">
+			<set>
+				<bean class="com.shixi.web.authorize.redis.SpringRedisCache">
+					<property name="redisTemplate" ref="redisTemplate" />
+					<property name="name" value="default"/>
+				</bean>
+				<bean class="com.shixi.web.authorize.redis.SpringRedisCache">
+					<property name="redisTemplate" ref="redisTemplate" />
+					<property name="name" value="commonCache"/>
+				</bean>
+			</set>
+		</property>
+	</bean>
+	
+	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxIdle" value="${spring.redis.pool.max-idle}"/>
+		<property name="maxWaitMillis" value="${spring.redis.pool.max-wait}"/>
+	</bean>
+	
+	<bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="poolConfig" ref="poolConfig"/>
+		<property name="port" value="${spring.redis.port}"/>
+		<property name="hostName" value="${spring.redis.host}"/>
+		<property name="password" value="${spring.redis.password}"/>
+		<property name="database" value="${spring.redis.database}"/>
+	</bean>
+	
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="keySerializer">
+			<bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+		</property>
+		<property name="hashKeySerializer">
+			<bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+		</property>
+		<property name="valueSerializer" ref="jackson2JsonRedisSerializer" />
+	</bean>
+</beans>
