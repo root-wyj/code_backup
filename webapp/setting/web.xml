@@ -1,0 +1,206 @@
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+      http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	id="WebApp_ID" version="3.0">
+
+	<display-name>Archetype Created Web Application</display-name>
+
+	<session-config>
+		<session-timeout>20</session-timeout>
+	</session-config>
+
+	<!-- Spring应用的上下文，理解层次化的ApplicationContext 这里面配置了service，ViewResolver，datasource等， 
+		这些应该是全局的，能被所有的servlet访问到，而不应该是属于某个servlet的 -->
+	<!-- 那也就是说可能会有多个dispatcheServlet，比如说我们有一个dispatcheServlet用来分发 用户的普通请求，但是可能还需要一个servlet来分发检索功能的请求（这样可以把检索提出来一个模块） -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			classpath:config/spring/applicationContext_*.xml
+		</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+    	<param-value>ayou.root</param-value>
+	</context-param>
+
+	<!-- log4j 日志系统的配置 -->
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>classpath:config/log/log4j.xml</param-value>
+	</context-param>
+	<!-- 配置log4j.xml变量，如果需要动态的就使用下面的方式，使用方法${name} -->
+	<!-- <context-param> <param-name>controller</param-name> <param-value>controller-log</param-value> 
+		</context-param> <context-param> <param-name>loggingLevel</param-name> <param-value>info</param-value> 
+		</context-param> -->
+
+	<!-- 防止Spring内存溢出监听器 应该注册为web.xml中的第一个Listener-->
+	<listener>
+		<listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+	</listener>
+	
+	<!-- 加载log4j配置文件 -->
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+
+ 	<listener>
+		<listener-class>com.shixi.web.listener.AppLoadListener</listener-class>
+	</listener>
+
+	<!-- spring 监听器 -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+<!-- 
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.html</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.png</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.jpg</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.jpeg</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.gif</url-pattern>
+	</servlet-mapping> -->
+	
+	<servlet>
+		<servlet-name>springDispatchServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>dispatchOptionsRequest</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:config/servlet/mvc-dispatcher-servlet.xml</param-value>
+		</init-param>
+
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+<!-- 	<servlet>
+		<servlet-name>routServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:config/servlet/mvc-htmrouter-servlet.xml</param-value>
+		</init-param>
+
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>backRoutServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:config/servlet/mvc-backrout-servlet.xml</param-value>
+		</init-param>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>resourceServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:config/servlet/mvc-resource-servlet.xml</param-value>
+		</init-param>
+	</servlet> -->
+	
+<!-- 	<servlet-mapping>
+		<servlet-name>resourceServlet</servlet-name>
+		<url-pattern>/resource/*</url-pattern>
+	</servlet-mapping> -->
+
+	<servlet-mapping>
+		<servlet-name>springDispatchServlet</servlet-name>
+		<url-pattern>/api/*</url-pattern>
+	</servlet-mapping>
+	
+<!-- 	<servlet-mapping>
+		<servlet-name>backRoutServlet</servlet-name>
+		<url-pattern>/back/*</url-pattern>
+	</servlet-mapping> -->
+	
+<!-- 	<servlet-mapping>
+		<servlet-name>routServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping> -->
+	<!-- <servlet-mapping> <servlet-name>default</servlet-name> <url-pattern>*.js</url-pattern> 
+		</servlet-mapping> <servlet-mapping> <servlet-name>default</servlet-name> 
+		<url-pattern>*.css</url-pattern> </servlet-mapping> <servlet-mapping> <servlet-name>default</servlet-name> 
+		<url-pattern>*.jpg</url-pattern> </servlet-mapping> <servlet-mapping> <servlet-name>default</servlet-name> 
+		<url-pattern>*.png</url-pattern> </servlet-mapping> <servlet-mapping> <servlet-name>default</servlet-name> 
+		<url-pattern>*.gif</url-pattern> </servlet-mapping> -->
+	<!-- 编码过滤器 -->
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+<!-- 		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param> -->
+	</filter>
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<!-- <servlet-name>springDispatchServlet</servlet-name> -->
+	</filter-mapping>
+
+	<!-- 下面两句话 配置了 默认页面 -->
+<!-- 	<welcome-file-list>
+    	<welcome-file>index</welcome-file>  
+  	</welcome-file-list>  
+  	
+  	<servlet-mapping>  
+  		<servlet-name>routServlet</servlet-name>  
+  		<url-pattern>/index</url-pattern>  
+	</servlet-mapping> -->
+
+	<!-- 错误跳转页面 -->
+	<error-page>
+		<error-code>404</error-code>
+		<location>/WEB-INF/views/errors/error-404.jsp</location>
+	</error-page>
+	<error-page>
+		<error-code>500</error-code>
+		<location>/WEB-INF/views/errors/error-404.jsp</location>
+	</error-page>
+	<error-page>
+		<error-code>414</error-code>
+		<location>/WEB-INF/views/errors/error-404.jsp</location>
+	</error-page>
+	<error-page>
+		<error-code>505</error-code>
+		<location>/WEB-INF/views/errors/error-404.jsp</location>
+	</error-page>
+	<error-page>
+		<error-code>400</error-code>
+		<location>/WEB-INF/views/errors/error-404.jsp</location>
+	</error-page>
+	<error-page>
+		<exception-type>java.lang.NullPointerException</exception-type>
+		<location>/WEB-INF/views/errors/error-404.jsp</location>
+	</error-page>
+
+</web-app>
